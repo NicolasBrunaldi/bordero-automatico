@@ -53,7 +53,7 @@ def criaBordero():
 
     dataframe1 = criaDataFrame_completo(lista_dicionario_completo)
     lista_dicionario_factoring = criaListaDicionarioParaFactoring(lista_dicionario_completo)
-    dataframe2 = criaDataFrame_completo(lista_dicionario_factoring)
+    dataframe2 = criaDataFrame_factoring(lista_dicionario_factoring)
     try:
         criaPlanilhaExcel(dataframe1, dataframe2)
     except Exception as e:
@@ -113,6 +113,18 @@ def criaDataFrame_completo(lista_dicionario):
     return data_frame
 
 
+def criaDataFrame_factoring(lista_dicionario):
+    data_frame = pd.DataFrame(lista_dicionario, index=None, columns=['CLIENTE',
+                                                                     'NF',
+                                                                     'CNPJ',
+                                                                     'EMISSÃO',
+                                                                     'VENC(1)',
+                                                                     'VENC(2)',
+                                                                     'FACTORING',
+                                                                     'A VISTA'])
+    return data_frame
+
+
 def criaPlanilhaExcel(dataframe_1, dataframe_2):
     writer = pd.ExcelWriter('bordero.xlsx', engine='xlsxwriter')
     dataframe_1.to_excel(writer, sheet_name='Valores Completos')
@@ -143,9 +155,19 @@ def validaEhFormataDataVencimento2(buscador):
 
 
 def criaListaDicionarioParaFactoring(lista_dicionario):
+    contador = 0
+    lista_cnpj = ['11.627.933/0002-00', '28.453.688/0002-65', '61.479.002/0001-08']
+
     for lista in lista_dicionario:
-        if lista[4] == 'A VISTA':
-            lista_dicionario.remove(lista)
+        if lista[4] == 'A VISTA' or lista[2] in lista_cnpj:
+            contador += 1
+
+    while contador > 0:
+        for lista in lista_dicionario:
+            if lista[4] == 'A VISTA' or lista[2] in lista_cnpj:
+                lista_dicionario.remove(lista)
+                contador -= 1
+
     return lista_dicionario
 
 
